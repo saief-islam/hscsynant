@@ -1,0 +1,404 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>HSC Synonym Antonym Drill</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: sticky header with mode tabs, set-picker chip grid, then a one-column list of question rows that each take a typed answer. */
+:root{
+  --bg:#f3f6fa; --surface:#ffffff; --fg:#13202f; --muted:#59687a; --line:#d9e1ea;
+  --syn:#1d4ed8; --syn-bg:#e6edff; --ant:#7a35c9; --ant-bg:#f0e8fb;
+  --ok:#14804a; --ok-bg:#e0f5e9; --bad:#c0302b; --bad-bg:#fde8e7;
+  --head:'Space Grotesk','Inter',system-ui,sans-serif;
+  --body:'Inter','Hind Siliguri',system-ui,sans-serif;
+  --bn:'Hind Siliguri','Inter',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1721; --surface:#17212d; --fg:#e8eef5; --muted:#92a1b3; --line:#2a3646;
+    --syn:#7ea2ff; --syn-bg:#1c2b52; --ant:#bf94f3; --ant-bg:#2c2043;
+    --ok:#4cc58a; --ok-bg:#15332a; --bad:#ff8a84; --bad-bg:#3a1f1f; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1721; --surface:#17212d; --fg:#e8eef5; --muted:#92a1b3; --line:#2a3646;
+  --syn:#7ea2ff; --syn-bg:#1c2b52; --ant:#bf94f3; --ant-bg:#2c2043;
+  --ok:#4cc58a; --ok-bg:#15332a; --bad:#ff8a84; --bad-bg:#3a1f1f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px}
+.wrap{max-width:820px;margin:0 auto}
+h1{font-family:var(--head);font-size:clamp(1.6rem,5vw,2.2rem);line-height:1.15;margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 18px;font-family:var(--bn)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 18px;font-size:13px;color:var(--muted)}
+.stats b{color:var(--fg);font-variant-numeric:tabular-nums}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:3px;margin-bottom:16px}
+.tabs button{border:0;background:none;color:var(--muted);font:600 14px var(--body);padding:8px 16px;border-radius:8px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--syn);outline-offset:2px}
+.picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:22px}
+.chip{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--fg);
+  padding:10px 12px;border-radius:10px;cursor:pointer;min-width:0}
+.chip .no{font:700 13px var(--head);color:var(--muted)}
+.chip .nm{font-weight:600;font-size:14px}
+.chip .best{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.chip.done .best{color:var(--ok);font-weight:600}
+.chip.mix{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip.mix .no,.chip.mix .best{color:var(--bg);opacity:.75}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:14px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.bar h2{font:700 1.15rem var(--head);margin:0;flex:1 1 auto;min-width:0}
+.score{font:600 14px var(--body);font-variant-numeric:tabular-nums;color:var(--muted)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 13px var(--body);padding:8px 12px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
+.q .n{font:700 13px var(--head);color:var(--muted);padding-top:4px;min-width:1.6em}
+.q .main{min-width:0}
+.tag{display:inline-block;font:700 11px var(--body);letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;margin-right:8px;vertical-align:2px}
+.tag.s{background:var(--syn-bg);color:var(--syn)}
+.tag.a{background:var(--ant-bg);color:var(--ant)}
+.word{font:700 1.3rem var(--head);overflow-wrap:anywhere}
+.meta{color:var(--muted);font-size:13px;margin-top:2px}
+.meta .bn{font-family:var(--bn);font-size:15px;color:var(--fg)}
+.ans{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ans input{flex:1 1 180px;min-width:0;font:500 15px var(--body);padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.fb{grid-column:2;font-size:13.5px;margin-top:4px;min-height:0}
+.fb:empty{display:none}
+.q.ok{border-color:var(--ok);background:linear-gradient(0deg,var(--ok-bg),var(--ok-bg)) }
+.q.bad{border-color:var(--bad);background:linear-gradient(0deg,var(--bad-bg),var(--bad-bg))}
+.q.ok .fb{color:var(--ok);font-weight:600}
+.q.bad .fb{color:var(--bad)}
+.fb .note{display:block;color:var(--muted);margin-top:2px;font-family:var(--bn)}
+.result{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.result strong{font:700 1.4rem var(--head)}
+.empty{color:var(--muted);padding:28px 0;text-align:center;font-family:var(--bn)}
+.key{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;margin-bottom:16px}
+.key h3{margin:0;padding:10px 14px;font:700 1rem var(--head);border-bottom:1px solid var(--line)}
+.row{display:grid;grid-template-columns:2.2em minmax(0,1.1fr) 5.5em minmax(0,1.6fr);gap:4px 10px;padding:9px 14px;border-bottom:1px solid var(--line);align-items:baseline}
+.row:last-child{border-bottom:0}
+.row .w b{font-family:var(--head)}
+.row .w small{display:block;color:var(--muted);font-family:var(--bn);font-size:13.5px}
+.row .r{overflow-wrap:anywhere}
+.row .l{color:var(--muted);font:700 12px var(--head)}
+@media (max-width:520px){
+  .row{grid-template-columns:2em minmax(0,1fr)}
+  .row .t{grid-column:2}.row .r{grid-column:2}
+}
+@media (prefers-reduced-motion:no-preference){.q{transition:border-color .15s,background .15s}}
+</style>
+
+<div class="wrap">
+  <h1>HSC Synonym Antonym Drill</h1>
+  <p class="sub">147 words from board question sets 29–52. Each word is tagged Synonym or Antonym. Type one answer; any one of the answers listed in the book counts as correct.</p>
+  <div class="stats" id="stats"></div>
+  <div class="tabs" role="group" aria-label="Mode">
+    <button id="tab-p" aria-pressed="true">Practice</button>
+    <button id="tab-k" aria-pressed="false">Answer key</button>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+var SETS=[
+{n:29,b:"Dhaka Board",y:2019,items:[
+["outer","adj","বহিস্থ","a","inner"],
+["proletarian","adj","শ্রমজীবী/সাধারণ","s","common / working-class"],
+["launch","n","নিক্ষেপ","s","introduction / inauguration"],
+["prepare","v","তৈরি করা","s","make / produce"],
+["began","v","শুরু","a","ended"],
+["faultless","adj","ত্রুটিহীন","a","faulty"],
+["nausea","n","বমি","s","vomiting"],
+["discomfort","n","অস্বস্তি","a","comfort"],
+["maintain","v","বজায় রাখা","s","sustain / retain"],
+["later","adj","পরবর্তীতে","a","earlier"]]},
+{n:30,b:"Cumilla Board",y:2019,items:[
+["different","adj","ভিন্ন","s","dissimilar"],
+["seek","v","খোঁজ করা","s","pursue"],
+["eager","adj","আগ্রহী","a","disinterested"],
+["observation","n","পর্যবেক্ষণ","s","comment / opinion"],
+["mere","adj","শুধুমাত্র","a","multiple / many"],
+["alert","adj","সতর্ক","s","watchful / vigilant"],
+["latent","adj","সুপ্ত","a","open / exposed"],
+["instructor","n","শিক্ষক","s","teacher / trainer"],
+["guide","v","পথ দেখানো","a","misguide"],
+["way","n","পথ","s","path"]]},
+{n:31,b:"Rajshahi Board",y:2019,items:[
+["dynamic","adj","গতিশীল","a","static"],
+["plan","n","পরিকল্পনা","a","disorder"],
+["aim","n","লক্ষ্য","s","goal / purpose"],
+["direction","n","নির্দেশ","s","course / trend"],
+["profession","n","পেশা","s","occupation / job"],
+["suit","v","মানানসই হওয়া","a","misfit / displease"],
+["aptitude","n","দক্ষতা","a","inability / inaptitude"],
+["vary","v","পরিবর্তন হওয়া","s","differ"],
+["educate","v","শিক্ষা দেওয়া","s","teach"],
+["citizen","n","নাগরিক","a","alien / non-citizen"]]},
+{n:32,b:"Chattogram Board",y:2019,items:[
+["fascinating","adj","মনোমুগ্ধকর","a","unattractive"],
+["interest","n","আগ্রহ","s","attention / eagerness"],
+["impatient","adj","অধৈর্য","a","patient"],
+["immoral","adj","অনৈতিক","s","wicked / unethical"],
+["contain","v","ধারণ করা","s","comprise / have"],
+["illogical","adj","অযৌক্তিক","a","logical"],
+["indifferent","adj","উদাসীন","s","uninterested"],
+["perfect","adj","পরিপূর্ণ/নিখুঁত","a","imperfect"],
+["instructive","adj","শিক্ষনীয়","s","educational / informative"],
+["ethical","adj","নৈতিক","a","unethical / immoral"]]},
+{n:33,b:"Dinajpur Board",y:2019,items:[
+["ideal","adj","আদর্শ","s","perfect"],
+["master","n","দক্ষ","s","expert"],
+["make","v","তৈরি করা","a","destroy"],
+["method","n","পদ্ধতি","s","system / way"],
+["convincing","adj","বিশ্বাসযোগ্য","a","doubtful / uncertain"],
+["praise","v","প্রশংসা করা","a","hate"],
+["mistake","n","ভুল","s","error / fault"],
+["angry","adj","রাগান্বিত","a","calm"],
+["simple","adj","সাধারণ","a","pompous / luxurious"],
+["moral","adj","নৈতিক","s","ethical"]]},
+{n:36,b:"Jessore Board",y:2016,items:[
+["allow","v","অনুমতি দেওয়া","s","permit / ensure"],
+["freedom","n","স্বাধীনতা","s","liberty / independence"],
+["opinion","n","মতামত","s","view / idea / judgment"],
+["fair","adj","ন্যায্য","a","unfair / unjust / improper"],
+["equal","adj","সমান","a","unequal / unbalanced / variable"],
+["division","n","বিভক্ত","a","union / unity / alliance"],
+["elect","v","নির্বাচিত করা","s","designate"],
+["system","n","পদ্ধতি","s","method / process"],
+["treatment","n","চিকিৎসা","s","cure / healing / remedy"],
+["facility","n","সুযোগ","s","opportunity / scope"]]},
+{n:38,b:"Rajshahi Board",y:2017,items:[
+["obviously","adv","সুস্পষ্টরূপে","s","apparently / clearly"],
+["prestige","n","সম্মান","s","honor / dignity / respect"],
+["national","adj","জাতীয়","s","regional / domestic"],
+["unique","adj","অনন্য","a","common / general / ordinary / simple"],
+["native","adj","দেশজ","a","foreign / external"],
+["variety","n","বৈচিত্র্য","s","type / sort"],
+["emerge","v","স্পষ্ট হয়ে ওঠা","a","disappear / vanish / depart"],
+["control","n","নিয়ন্ত্রণ","a","anarchy / domination"],
+["important","adj","গুরুত্বপূর্ণ","s","significant / great / meaningful"],
+["intelligibility","n","বোধগম্যতা","a","obscurity / illegibility / unintelligibility"]]},
+{n:39,b:"Jessore / Barisal Board",y:2017,items:[
+["success","n","জয় / সাফল্য","a","failure / defeat"],
+["job","n","কাজ","s","work / action / service"],
+["great","adj","মহান","a","common / infamous / ordinary / simple"],
+["because","conj","কারণ","s","as / reason"],
+["know","v","জানা","s","realize / understand / learn"],
+["follow","v","অনুসরণ করা","a","unfollow / disobey"],
+["rule","n","নিয়ম","s","principle / law / regulation"],
+["never","adv","কখনোই না","a","always / ever"],
+["victory","n","জয়","s","win / success / glory"],
+["desirable","adj","কাম্য","a","undesirable / unwanted"]]},
+{n:42,b:"Sylhet Board",y:2019,items:[
+["good-looking","adj","সুদর্শন","s","attractive / beautiful"],
+["dark","adj","অন্ধকার","s","black / sable"],
+["flawless","adj","ত্রুটিহীন","s","perfect / faultless"],
+["shiny","adj","চকচকে","a","dark"],
+["slender","adj","পাতলা","a","fat"],
+["graceful","adj","মার্জিত","s","elegant / gracious"],
+["stylishly","adv","জাঁকালো","a","simply"],
+["appreciate","v","প্রশংসা করা","a","depreciate"],
+["notice","v","লক্ষ্য করা","a","overlook / ignore / neglect"],
+["ambition","n","উচ্চ আকাঙ্ক্ষা","s","aspiration / desire"]]},
+{n:43,b:"Barishal Board",y:2019,items:[
+["require","v","দরকার হওয়া","s","need"],
+["proficiency","n","দক্ষতা","a","incompetence / deficiency"],
+["wonder","n","বিস্ময়","s","surprise"],
+["tested","v","পরীক্ষিত হওয়া","s","verified"],
+["equally","adv","সমানভাবে","a","unequally"],
+["disappointing","adj","হতাশাজনক","s","unsatisfactory"],
+["presumably","adv","সম্ভবত","s","improbably","The book lists this as a synonym."],
+["qualify","v","যোগ্য হওয়া","a","disqualify"],
+["obviously","adj","স্পষ্ট","a","unnoticeably / secretly"],
+["wrong","adj","ভুল","s","incorrect"]]},
+{n:44,b:"Rajshahi Board (Kha set)",y:2016,items:[
+["friend","n","বন্ধু","a","enemy / foe"],
+["need","v","প্রয়োজন","a","ignore / have"],
+["sympathy","n","সহানুভূতি","s","compassion / pity"],
+["prove","v","প্রমাণ করা","s","verify / show"],
+["false","adj","মিথ্যা","a","true"],
+["harm","n","ক্ষতি","a","repair / mending"],
+["laugh","v","হাসা","a","cry / weep"],
+["pleasure","n","আনন্দ","s","happiness / joy / delight"],
+["bring","v","আনা","s","fetch / collect"],
+["idea","n","ধারণা","s","notion / concept / thought"]]},
+{n:45,b:"Dhaka Board",y:2017,items:[
+["popular","adj","জনপ্রিয়","a","unpopular"],
+["form","n","ধরণ","s","type / sort"],
+["entertainment","n","বিনোদন","s","amusement / recreation"],
+["organize","v","সংগঠিত করা","s","arrange / make up / settle down"],
+["sponsor","v","পৃষ্ঠপোষক","s","patronize"],
+["multinational","adj","বহুজাতিক","a","local / national"],
+["pay","v","প্রদান করা","a","receive / accept / take"],
+["watch","v","দেখা","s","gaze / see"],
+["maximum","adj","বৃহত্তম","a","minimum / minimal / least"],
+["recognition","n","স্বীকৃতি","a","denial / refusal"]]},
+{n:48,b:"Dinajpur Board",y:2017,items:[
+["perplexing","adj","জটিল","a","clear / obvious"],
+["upsetting","adj","দুঃখজনক","a","pleasant / delightful / lovely"],
+["imperialism","n","সাম্রাজ্যবাদ","s","colonialism / domination"],
+["evil","adj","খারাপ","a","good / excellent / lucky"],
+["sooner","adv","তাড়াতাড়ি","a","later / after"],
+["chucked","v","ফেলে দেয়া, ত্যাগ করা","s","quit / resign / give up"],
+["better","adj","ভাল","a","worse"],
+["theoretically","adv","তাত্ত্বিকভাবে","a","hypothetically","The book lists this as an antonym, but the two words mean almost the same."],
+["secretly","adv","গোপনে","s","privately / confidentially"],
+["oppressor","n","অত্যাচারী","s","dictator / autocrat / tyrant"]]},
+{n:50,b:"Barisal Board",y:2016,items:[
+["curse","n","অভিশাপ","a","blessing / boon"],
+["cause","n","কারণ","s","reason / motive"],
+["ignorance","n","অজ্ঞতা","a","knowledge / wisdom / consciousness"],
+["frustrates","v","হতাশ করা","s","disappoint / hampers"],
+["development","n","উন্নতি","s","progress / improvement / prosperity"],
+["succeed","v","সফল হওয়া","s","prosper / flourish"],
+["eradicated","v","দূর করা","a","cherished / established"]]},
+{n:52,b:"Dinajpur Board",y:2016,items:[
+["consist","n","গঠিত","s","structure / form"],
+["narrow","adj","সরু","a","wide / broad / spacious"],
+["include","v","অন্তর্ভুক্ত করা","a","exclude"],
+["aquatic","adj","জলজ","s","water born / hydrophytes"],
+["successful","adj","সফল","s","fruitful / prosperous"],
+["broad","adj","প্রশস্ত","a","narrow / confined"],
+["habitat","n","বাসস্থান","s","home / residence"],
+["inconspicuous","adj","অস্পষ্ট","s","unclear"],
+["certain","adj","নির্দিষ্ট সংখ্যক","a","uncertain / indefinite"],
+["employed","v","নিয়োজিত","s","appointed / engaged"]]}
+];
+
+var LS="hsc-syn-ant-best";
+function loadBest(){try{return JSON.parse(localStorage.getItem(LS)||"{}")}catch(e){return {}}}
+function saveBest(k,v){try{var b=loadBest();if(!(k in b)||v>b[k]){b[k]=v;localStorage.setItem(LS,JSON.stringify(b))}}catch(e){}}
+
+var app=document.getElementById("app");
+var mode="p", cur=null, list=[];
+
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function norm(s){return s.toLowerCase().replace(/[^a-z\- ]/g," ").replace(/\s+/g," ").trim()}
+function pieces(s){return s.split(/[\/,;]/).map(norm).filter(Boolean)}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+
+var total=SETS.reduce(function(n,s){return n+s.items.length},0);
+var syn=0,ant=0;SETS.forEach(function(s){s.items.forEach(function(i){i[3]==="s"?syn++:ant++})});
+document.getElementById("stats").innerHTML='<span><b>'+total+'</b> words</span><span><b>'+SETS.length+'</b> board sets</span><span><b>'+syn+'</b> synonym</span><span><b>'+ant+'</b> antonym</span>';
+
+function picker(){
+  var best=loadBest(),h='<div class="picker">';
+  h+='<button class="chip mix" data-set="mix" aria-pressed="'+(cur==="mix")+'"><span class="no">RANDOM</span><span class="nm">Mix 15 words</span><span class="best">from all sets</span></button>';
+  SETS.forEach(function(s){
+    var b=best[s.n],done=b!==undefined;
+    h+='<button class="chip'+(done?' done':'')+'" data-set="'+s.n+'" aria-pressed="'+(cur===s.n)+'"><span class="no">SET '+s.n+'</span><span class="nm">'+esc(s.b)+' '+s.y+'</span><span class="best">'+(done?'Best '+b+'/'+s.items.length:s.items.length+' words')+'</span></button>';
+  });
+  return h+'</div>';
+}
+
+function startSet(id){
+  cur=id;
+  if(id==="mix"){
+    var all=[];SETS.forEach(function(s){s.items.forEach(function(i){all.push({it:i,lab:"Set "+s.n})})});
+    list=shuffle(all).slice(0,15);
+  }else{
+    var s=SETS.filter(function(x){return x.n===id})[0];
+    list=s.items.map(function(i){return {it:i,lab:""}});
+  }
+  list.forEach(function(q){q.state=null});
+  render();
+}
+
+function render(){
+  if(mode==="k"){renderKey();return}
+  var h=picker();
+  if(cur===null){
+    h+='<div class="empty">Pick a set above. Then type the synonym or antonym of each word and press Enter.</div>';
+    app.innerHTML=h;return;
+  }
+  var title=cur==="mix"?"Mix · 15 words":"Set "+cur+" · "+SETS.filter(function(x){return x.n===cur})[0].b+" "+SETS.filter(function(x){return x.n===cur})[0].y;
+  h+='<div class="bar"><h2>'+esc(title)+'</h2><span class="score" id="score" aria-live="polite"></span><button class="btn" id="checkall">Check all</button><button class="btn" id="reset">Restart</button></div>';
+  h+='<div id="qs">';
+  list.forEach(function(q,i){
+    var it=q.it,t=it[3]==="s"?"Synonym":"Antonym";
+    h+='<div class="q" id="q'+i+'"><div class="n">'+(i+1)+'</div><div class="main"><span class="tag '+it[3]+'">'+t+'</span><span class="word">'+esc(it[0])+'</span>'
+     +'<div class="meta">('+esc(it[1])+') <span class="bn">'+esc(it[2])+'</span>'+(q.lab?' · '+q.lab:'')+'</div>'
+     +'<div class="ans"><input id="a'+i+'" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type a '+t.toLowerCase()+'" aria-label="'+t+' of '+esc(it[0])+'"><button class="btn" data-check="'+i+'">Check</button><button class="btn" data-show="'+i+'">Show</button></div></div>'
+     +'<div class="fb" id="f'+i+'"></div></div>';
+  });
+  h+='</div><div id="result"></div>';
+  app.innerHTML=h;
+  updateScore();
+}
+
+function grade(i,reveal){
+  var q=list[i],it=q.it,box=document.getElementById("q"+i),fb=document.getElementById("f"+i),inp=document.getElementById("a"+i);
+  var acc=pieces(it[4]),typed=pieces(inp.value);
+  var note=it[5]?'<span class="note">'+esc(it[5])+'</span>':'';
+  box.classList.remove("ok","bad");
+  if(reveal){
+    q.state=q.state==="ok"?"ok":"bad";
+    if(q.state==="bad")box.classList.add("bad");else box.classList.add("ok");
+    fb.innerHTML='Answer: <b>'+esc(it[4])+'</b>'+note;
+  }else if(!typed.length){
+    fb.innerHTML="";q.state=null;return;
+  }else{
+    var hit=typed.some(function(t){return acc.indexOf(t)>-1});
+    q.state=hit?"ok":"bad";
+    box.classList.add(hit?"ok":"bad");
+    fb.innerHTML=hit?'Correct ✓ &nbsp;<span style="font-weight:400">In the book: '+esc(it[4])+'</span>'+note:'Not a match. Answer: <b>'+esc(it[4])+'</b>'+note;
+  }
+  updateScore();
+}
+
+function updateScore(){
+  var ok=0,done=0;list.forEach(function(q){if(q.state){done++;if(q.state==="ok")ok++}});
+  var el=document.getElementById("score");if(!el)return;
+  el.textContent=ok+" / "+list.length+" correct";
+  var r=document.getElementById("result");
+  if(done===list.length&&list.length){
+    if(cur!=="mix")saveBest(cur,ok);
+    var wrong=list.length-ok;
+    r.innerHTML='<div class="result"><strong>'+ok+' / '+list.length+'</strong><span>'+(wrong?wrong+' wrong. Try again.':'All correct! Move on to the next set.')+'</span>'+(wrong?'<button class="btn primary" id="retry">Retry wrong only</button>':'')+'</div>';
+    refreshPicker();
+  }else r.innerHTML="";
+}
+function refreshPicker(){
+  var p=document.querySelector(".picker");if(!p)return;
+  var d=document.createElement("div");d.innerHTML=picker();p.replaceWith(d.firstChild);
+}
+
+function renderKey(){
+  var h="";
+  SETS.forEach(function(s){
+    h+='<section class="key"><h3>Set '+s.n+' · '+esc(s.b)+' '+s.y+'</h3>';
+    s.items.forEach(function(it,i){
+      h+='<div class="row"><span class="l">'+(i+1)+'</span><span class="w"><b>'+esc(it[0])+'</b> <span style="color:var(--muted)">('+esc(it[1])+')</span><small>'+esc(it[2])+'</small></span><span class="t"><span class="tag '+it[3]+'">'+(it[3]==="s"?"Synonym":"Antonym")+'</span></span><span class="r">'+esc(it[4])+(it[5]?'<small style="display:block;color:var(--muted);font-family:var(--bn)">'+esc(it[5])+'</small>':'')+'</span></div>';
+    });
+    h+='</section>';
+  });
+  app.innerHTML=h;
+}
+
+document.getElementById("tab-p").onclick=function(){mode="p";this.setAttribute("aria-pressed","true");document.getElementById("tab-k").setAttribute("aria-pressed","false");render()};
+document.getElementById("tab-k").onclick=function(){mode="k";this.setAttribute("aria-pressed","true");document.getElementById("tab-p").setAttribute("aria-pressed","false");render()};
+
+app.addEventListener("click",function(e){
+  var t=e.target.closest("button");if(!t)return;
+  if(t.dataset.set){startSet(t.dataset.set==="mix"?"mix":parseInt(t.dataset.set,10));window.scrollTo(0,0);return}
+  if(t.dataset.check!==undefined){grade(+t.dataset.check,false);return}
+  if(t.dataset.show!==undefined){grade(+t.dataset.show,true);return}
+  if(t.id==="checkall"){list.forEach(function(q,i){if(!q.state)grade(i,false)});return}
+  if(t.id==="reset"){startSet(cur);return}
+  if(t.id==="retry"){
+    list=list.filter(function(q){return q.state!=="ok"});
+    list.forEach(function(q){q.state=null});
+    var keep=cur;render();cur=keep;window.scrollTo(0,0);return;
+  }
+});
+app.addEventListener("keydown",function(e){
+  if(e.key!=="Enter"||!e.target.matches(".ans input"))return;
+  var i=+e.target.id.slice(1);grade(i,false);
+  var nx=document.getElementById("a"+(i+1));if(nx)nx.focus();
+});
+
+render();
+</script>
+
+</body></html>
